@@ -1,0 +1,44 @@
+import random
+import chess
+import json
+import os
+
+# Define constants
+LEARNING_FILE = os.path.join(os.path.dirname(__file__), 'learning.json')
+
+# Load learning data
+def load_learning_data():
+    """Load the learning data from a JSON file."""
+    if os.path.exists(LEARNING_FILE):
+        with open(LEARNING_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_learning_data(data):
+    """Save the learning data to a JSON file."""
+    with open(LEARNING_FILE, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def update_learning_data(board_state, move, result):
+    """Update the learning data with new moves and results."""
+    data = load_learning_data()
+    
+    state_key = board_state
+    if state_key not in data:
+        data[state_key] = {'moves': [], 'results': []}
+    
+    data[state_key]['moves'].append(move)
+    data[state_key]['results'].append(result)
+    
+    save_learning_data(data)
+
+def choose_best_move(board_state, moves):
+    """Select the best move based on learned data."""
+    data = load_learning_data()
+    
+    if board_state in data and data[board_state]['moves']:
+        move_results = data[board_state]['results']
+        best_move_index = move_results.index(max(move_results))
+        return data[board_state]['moves'][best_move_index]
+    
+    return random.choice(moves)
