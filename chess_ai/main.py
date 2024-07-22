@@ -9,11 +9,11 @@ HEIGHT = 750
 SQ_SIZE = 80
 IMAGES = {}
 board = chess.Board()
-font = None  # Font object for rendering text
+font = None  
 input_text = ""
 depth = 3  # Depth for minimax or other AI algorithms
 FONT_SIZE = 24  # Size of the font for the labels
-ALERT_DISPLAY_TIME = 2000  # Time in milliseconds to display the alert
+ALERT_DISPLAY_TIME = 2000  
 
 def load_images():
     """Load all images for the chess pieces."""
