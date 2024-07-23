@@ -1,0 +1,28 @@
+/* flask_app/static/style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+td {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 24px;
+}
+
+tr:nth-child(even) td {
+    background-color: #f0f0f0;
+}
+
+tr:nth-child(odd) td {
+    background-color: #d0d0d0;
+}

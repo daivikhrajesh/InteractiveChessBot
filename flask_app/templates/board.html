@@ -1,0 +1,27 @@
+<!-- flask_app/templates/board.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Chess Board</h1>
+    <table>
+        {% for row in board %}
+        <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <script>
+        // JavaScript to handle board interactions and move pieces
+        // This can be extended to add click events for moving pieces
+    </script>
+</body>
+</html>

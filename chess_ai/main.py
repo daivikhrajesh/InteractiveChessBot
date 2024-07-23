@@ -84,11 +84,9 @@ def draw_alert(screen, message):
 def ai_move():
     """Let the AI make a move."""
     legal_moves = list(board.legal_moves)
-    print(f"AI legal moves: {[move.uci() for move in legal_moves]}")  # Debugging line
     if legal_moves:
         move = random.choice(legal_moves)  # Placeholder: replace with a more sophisticated move selection
         board.push(move)
-        print(f"AI move: {move.uci()}")  # Debugging line
         return move
     return None
 
@@ -105,7 +103,6 @@ def handle_input():
                 input_text = input_text[:-1]
             elif event.key == pygame.K_RETURN:
                 if len(input_text) > 0:  # Check if input is non-empty
-                    print(f"Input received: {input_text}")  # Debugging line
                     try:
                         # Try parsing the input as SAN (algebraic notation)
                         move = board.parse_san(input_text)
@@ -130,6 +127,43 @@ def handle_input():
             else:
                 input_text += event.unicode
     return True
+
+def is_valid_move(move):
+    """Check if a move is valid."""
+    try:
+        parsed_move = board.parse_san(move)
+        return parsed_move in board.legal_moves
+    except:
+        return False
+
+def move_piece(move):
+    """Move a piece and return if it was successful."""
+    try:
+        parsed_move = board.parse_san(move)
+        if parsed_move in board.legal_moves:
+            board.push(parsed_move)
+            ai_move()  # AI move after the player move
+            return True
+        return False
+    except:
+        return False
+
+def check_game_status():
+    """Return the game status."""
+    if board.is_checkmate():
+        return "Checkmate"
+    elif board.is_check():
+        return "Check"
+    elif board.is_stalemate():
+        return "Stalemate"
+    elif board.is_insufficient_material():
+        return "Insufficient Material"
+    elif board.is_seventyfive_moves():
+        return "Draw by 75-move rule"
+    elif board.is_fivefold_repetition():
+        return "Draw by fivefold repetition"
+    else:
+        return "Ongoing"
 
 def play_game(depth=3):
     """Main function to run the chess game."""

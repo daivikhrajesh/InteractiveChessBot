@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div id="board"></div>
+    <div id="input">
+        <input type="text" id="moveInput" placeholder="Enter move (e2e4)">
+        <button onclick="makeMove()">Move</button>
+    </div>
+    <script>
+        const boardElement = document.getElementById('board');
+        const moveInput = document.getElementById('moveInput');
+
+        function renderBoard(board) {
+            boardElement.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = 'square';
+                    const piece = board[row][col];
+                    if (piece) {
+                        const img = document.createElement('img');
+                        img.src = `/static/images/${piece}.png`;
+                        square.appendChild(img);
+                    }
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+
+        async function fetchBoard() {
+            const response = await fetch('/get_board');
+            const data = await response.json();
+            renderBoard(data.board);
+        }
+
+        async function makeMove() {
+            const move = moveInput.value;
+            const response = await fetch('/move_piece', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ move })
+            });
+            const result = await response.json();
+            if (result.success) {
+                await fetchBoard();
+            } else {
+                alert('Invalid move!');
+            }
+        }
+
+        fetchBoard();
+    </script>
+</body>
+</html>
