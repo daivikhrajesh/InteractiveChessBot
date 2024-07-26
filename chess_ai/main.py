@@ -48,22 +48,26 @@ def draw_board(screen):
     font = pygame.font.Font(None, FONT_SIZE)
     for i in range(8):
         text_surface = font.render(chr(97 + i), True, pygame.Color('black'))
-        screen.blit(text_surface, (board_top_left_x + i * SQ_SIZE + (SQ_SIZE - text_surface.get_width()) // 2, HEIGHT - FONT_SIZE))
+        text_rect = text_surface.get_rect(center=(board_top_left_x + i * SQ_SIZE + SQ_SIZE // 2, HEIGHT - FONT_SIZE // 2))
+        screen.blit(text_surface, text_rect)
 
     # Draw rank numbers (8-1) on the left
     for i in range(8):
         text_surface = font.render(str(8 - i), True, pygame.Color('black'))
-        screen.blit(text_surface, (board_top_left_x - text_surface.get_width() - 10, board_top_left_y + (7 - i) * SQ_SIZE + (SQ_SIZE - text_surface.get_height()) // 2))
+        text_rect = text_surface.get_rect(center=(board_top_left_x - FONT_SIZE, board_top_left_y + i * SQ_SIZE + SQ_SIZE // 2))
+        screen.blit(text_surface, text_rect)
 
     # Draw file letters (a-h) at the top
     for i in range(8):
         text_surface = font.render(chr(97 + i), True, pygame.Color('black'))
-        screen.blit(text_surface, (board_top_left_x + i * SQ_SIZE + (SQ_SIZE - text_surface.get_width()) // 2, board_top_left_y - FONT_SIZE // 2))
+        text_rect = text_surface.get_rect(center=(board_top_left_x + i * SQ_SIZE + SQ_SIZE // 2, board_top_left_y - FONT_SIZE // 2))
+        screen.blit(text_surface, text_rect)
 
     # Draw rank numbers (8-1) on the right
     for i in range(8):
         text_surface = font.render(str(8 - i), True, pygame.Color('black'))
-        screen.blit(text_surface, (board_top_left_x + (SQ_SIZE * 8) + FONT_SIZE + 10, board_top_left_y + (7 - i) * SQ_SIZE + (SQ_SIZE - text_surface.get_height()) // 2))
+        text_rect = text_surface.get_rect(center=(board_top_left_x + (SQ_SIZE * 8) + FONT_SIZE // 2, board_top_left_y + i * SQ_SIZE + SQ_SIZE // 2))
+        screen.blit(text_surface, text_rect)
 
 def draw_text_box(screen, text):
     """Draw the text input box and the current text."""
@@ -173,7 +177,7 @@ def play_game(depth=3):
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Chess Game')
-    font = pygame.font.Font(None, 36)
+    font = pygame.font.Font(None, FONT_SIZE)
     load_images()
 
     # AI makes the first move
