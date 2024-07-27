@@ -5,7 +5,7 @@ import random
 
 # Define constants
 WIDTH = 750
-HEIGHT = 750
+HEIGHT = 775
 SQ_SIZE = 80
 IMAGES = {}
 board = chess.Board()
@@ -48,12 +48,12 @@ def draw_board(screen):
     font = pygame.font.Font(None, FONT_SIZE)
     for i in range(8):
         text_surface = font.render(chr(97 + i), True, pygame.Color('black'))
-        text_rect = text_surface.get_rect(center=(board_top_left_x + i * SQ_SIZE + SQ_SIZE // 2, HEIGHT - FONT_SIZE // 2))
+        text_rect = text_surface.get_rect(center=(board_top_left_x + i * SQ_SIZE + SQ_SIZE // 2, board_top_left_y + 8 * SQ_SIZE + FONT_SIZE // 2))
         screen.blit(text_surface, text_rect)
 
-    # Draw rank numbers (8-1) on the left
+    # Draw reversed rank numbers (1-8) on the left
     for i in range(8):
-        text_surface = font.render(str(8 - i), True, pygame.Color('black'))
+        text_surface = font.render(str(i + 1), True, pygame.Color('black'))
         text_rect = text_surface.get_rect(center=(board_top_left_x - FONT_SIZE, board_top_left_y + i * SQ_SIZE + SQ_SIZE // 2))
         screen.blit(text_surface, text_rect)
 
@@ -63,9 +63,9 @@ def draw_board(screen):
         text_rect = text_surface.get_rect(center=(board_top_left_x + i * SQ_SIZE + SQ_SIZE // 2, board_top_left_y - FONT_SIZE // 2))
         screen.blit(text_surface, text_rect)
 
-    # Draw rank numbers (8-1) on the right
+    # Draw reversed rank numbers (1-8) on the right
     for i in range(8):
-        text_surface = font.render(str(8 - i), True, pygame.Color('black'))
+        text_surface = font.render(str(i + 1), True, pygame.Color('black'))
         text_rect = text_surface.get_rect(center=(board_top_left_x + (SQ_SIZE * 8) + FONT_SIZE // 2, board_top_left_y + i * SQ_SIZE + SQ_SIZE // 2))
         screen.blit(text_surface, text_rect)
 
@@ -108,9 +108,7 @@ def handle_input():
             elif event.key == pygame.K_RETURN:
                 if len(input_text) > 0:  # Check if input is non-empty
                     try:
-                        # Try parsing the input as SAN (algebraic notation)
                         move = board.parse_san(input_text)
-                        uci_move = move.uci()  # Convert the SAN move to UCI
                         if move in board.legal_moves:
                             board.push(move)
                             if board.is_checkmate():
@@ -119,7 +117,7 @@ def handle_input():
                                 draw_alert(pygame.display.get_surface(), "Check!!")
                             ai_move()  # AI makes its move after the user move
                         else:
-                            print(f"Invalid move: {uci_move} (UCI format)")
+                            print(f"Illegal move: {input_text}")
                     except Exception as e:
                         print(f"Error processing move: {e}")
                 else:
