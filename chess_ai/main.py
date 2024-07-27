@@ -1,6 +1,7 @@
 import pygame
 import os
 import chess
+import numpy as np
 import random
 
 # Define constants
@@ -11,9 +12,12 @@ IMAGES = {}
 board = chess.Board()
 font = None  
 input_text = ""
-depth = 3  # Depth for minimax or other AI algorithms
 FONT_SIZE = 24  # Size of the font for the labels
 ALERT_DISPLAY_TIME = 2000  
+EPSILON = 0.1  # Exploration rate for Q-learning
+ALPHA = 0.1  # Learning rate
+GAMMA = 0.9  # Discount factor
+Q_TABLE = {}  # Q-table for Q-learning
 
 def load_images():
     """Load all images for the chess pieces."""
@@ -85,14 +89,36 @@ def draw_alert(screen, message):
     pygame.display.flip()
     pygame.time.wait(ALERT_DISPLAY_TIME)  # Wait for ALERT_DISPLAY_TIME milliseconds
 
+def get_q_key(board):
+    """Get a unique key for the Q-table based on the board state."""
+    return board.fen()  # Use FEN string as the state representation
+
+def choose_action(state, legal_moves):
+    """Choose an action using an epsilon-greedy strategy."""
+    if random.uniform(0, 1) < EPSILON:
+        # Exploration: choose a random move
+        return random.choice(legal_moves)
+    else:
+        # Exploitation: choose the best move based on Q-values
+        q_values = [Q_TABLE.get((state, move.uci()), 0) for move in legal_moves]
+        max_q_value = max(q_values, default=0)
+        best_moves = [move for move, q_value in zip(legal_moves, q_values) if q_value == max_q_value]
+        return random.choice(best_moves) if best_moves else random.choice(legal_moves)
+
+def update_q_table(state, action, reward, next_state):
+    """Update the Q-table using the Q-learning formula."""
+    best_next_action = choose_action(next_state, list(board.legal_moves))
+    q_current = Q_TABLE.get((state, action.uci()), 0)
+    q_next = Q_TABLE.get((next_state, best_next_action.uci()), 0)
+    Q_TABLE[(state, action.uci())] = q_current + ALPHA * (reward + GAMMA * q_next - q_current)
+
 def ai_move():
-    """Let the AI make a move."""
+    """Let the AI make a move using Q-learning."""
+    state = get_q_key(board)
     legal_moves = list(board.legal_moves)
-    if legal_moves:
-        move = random.choice(legal_moves)  # Placeholder: replace with a more sophisticated move selection
-        board.push(move)
-        return move
-    return None
+    action = choose_action(state, legal_moves)
+    board.push(action)
+    return action
 
 def handle_input():
     """Handle user input for moving pieces."""
@@ -111,11 +137,22 @@ def handle_input():
                         move = board.parse_san(input_text)
                         if move in board.legal_moves:
                             board.push(move)
+                            # Reward or penalty
+                            reward = 0
                             if board.is_checkmate():
+                                reward = 10
                                 draw_alert(pygame.display.get_surface(), "Checkmate!")
                             elif board.is_check():
+                                reward = 1
                                 draw_alert(pygame.display.get_surface(), "Check!!")
-                            ai_move()  # AI makes its move after the user move
+                            
+                            # Update Q-table
+                            next_state = get_q_key(board)
+                            update_q_table(get_q_key(board), move, reward, next_state)
+
+                            # AI makes its move after the user move
+                            ai_move()
+
                         else:
                             print(f"Illegal move: {input_text}")
                     except Exception as e:
@@ -129,26 +166,6 @@ def handle_input():
             else:
                 input_text += event.unicode
     return True
-
-def is_valid_move(move):
-    """Check if a move is valid."""
-    try:
-        parsed_move = board.parse_san(move)
-        return parsed_move in board.legal_moves
-    except:
-        return False
-
-def move_piece(move):
-    """Move a piece and return if it was successful."""
-    try:
-        parsed_move = board.parse_san(move)
-        if parsed_move in board.legal_moves:
-            board.push(parsed_move)
-            ai_move()  # AI move after the player move
-            return True
-        return False
-    except:
-        return False
 
 def check_game_status():
     """Return the game status."""
@@ -167,7 +184,7 @@ def check_game_status():
     else:
         return "Ongoing"
 
-def play_game(depth=3):
+def play_game():
     """Main function to run the chess game."""
     global font, input_text
     input_text = ""
@@ -186,17 +203,16 @@ def play_game(depth=3):
         screen.fill(pygame.Color('lightblue'))
         draw_board(screen)
         draw_text_box(screen, input_text)
-        
-        # Check for alerts
-        if board.is_checkmate():
-            draw_alert(screen, "Checkmate!")
-        elif board.is_check():
-            draw_alert(screen, "Check!!")
-        
-        pygame.display.flip()
+        status = check_game_status()
+        if status != "Ongoing":
+            draw_alert(screen, f"Game Over: {status}")
+            pygame.time.wait(ALERT_DISPLAY_TIME)
+            running = False
+
         running = handle_input()
+        pygame.display.flip()
 
     pygame.quit()
 
 if __name__ == "__main__":
-    play_game(depth=3)
+    play_game()
